@@ -19,11 +19,11 @@ const PostDetailModal = ({ isOpen, post, onClose, onEdit, onDelete }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col">
-        {/* 닫기 버튼만 있는 최소 헤더 */}
-        <div className="absolute top-2 right-2 z-10">
+        {/* 닫기 버튼 - 오른쪽 아래 */}
+        <div className="absolute bottom-4 right-4 z-10">
           <button
             onClick={onClose}
-            className="p-2 bg-white hover:bg-notion-gray-100 rounded-full shadow-md transition-colors"
+            className="p-3 bg-white hover:bg-notion-gray-100 rounded-full shadow-lg transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

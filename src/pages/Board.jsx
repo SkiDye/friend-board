@@ -223,11 +223,9 @@ const Board = () => {
                       alt={post.title}
                       className="w-full h-full object-cover"
                     />
-                    {/* 그라데이션 오버레이 */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    {/* 제목 오버레이 */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                      <h3 className="font-semibold text-white text-sm sm:text-base line-clamp-2 mb-1">
+                    {/* 제목 영역 - 완전 검정 배경 */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black p-3 sm:p-4">
+                      <h3 className="font-semibold text-white text-sm sm:text-base mb-1">
                         {post.title}
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-white/80">
