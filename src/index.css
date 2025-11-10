@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  /* 노션 스타일 커스텀 색상 */
+  --color-notion-gray-50: #F7F6F3;
+  --color-notion-gray-100: #EBEAE6;
+  --color-notion-gray-200: #D3D1CB;
+  --color-notion-gray-300: #B8B7B0;
+  --color-notion-gray-400: #9B9A97;
+  --color-notion-gray-500: #7C7B78;
+  --color-notion-gray-600: #5E5D5A;
+  --color-notion-gray-700: #3F3E3B;
+  --color-notion-gray-800: #211F1C;
+  --color-notion-gray-900: #191919;
+  --color-notion-text: #37352F;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-notion-gray-50);
+    color: var(--color-notion-text);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+    /* 모바일 스크롤 최적화 */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 터치 디바이스 최적화 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /* 노션 스타일 버튼 */
+  .btn-primary {
+    @apply px-4 py-2 bg-notion-text text-white rounded-md hover:bg-notion-gray-700
+           transition-all active:scale-95 touch-manipulation;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-notion-gray-100 text-notion-text rounded-md hover:bg-notion-gray-200
+           transition-all active:scale-95 touch-manipulation;
+  }
+
+  /* 노션 스타일 카드 */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-notion-gray-200 p-4;
+  }
+
+  /* 노션 스타일 인풋 */
+  .input {
+    @apply w-full px-3 py-2 bg-white border border-notion-gray-200 rounded-md
+           focus:outline-none focus:ring-2 focus:ring-notion-gray-300 transition-all;
+  }
+}
+
+@layer utilities {
+  /* 터치 인터랙션 유틸리티 */
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+
+  /* 스크롤바 스타일 (웹킷 브라우저) */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #D3D1CB;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #B8B7B0;
+  }
+}
