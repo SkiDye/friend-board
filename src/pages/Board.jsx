@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import PostContent from '../components/board/PostContent'
 import PostWriteModal from '../components/board/PostWriteModal'
 import PostDetailModal from '../components/board/PostDetailModal'
-import ImageSlider from '../components/board/ImageSlider'
 import { usePosts, useCreatePost, useUpdatePost, useDeletePost } from '../hooks/usePosts'
 
 const Board = () => {
@@ -192,60 +191,79 @@ const Board = () => {
         )}
       </div>
 
-      <div className="space-y-3">
-        {filteredPosts.length === 0 ? (
-          <div className="text-center py-12 text-notion-gray-500">
-            {searchQuery ? (
-              <>
-                <p>검색 결과가 없습니다.</p>
-                <p className="text-sm mt-2">다른 키워드로 검색해보세요.</p>
-              </>
-            ) : (
-              <>
-                <p>아직 게시글이 없습니다.</p>
-                <p className="text-sm mt-2">첫 게시글을 작성해보세요!</p>
-              </>
-            )}
-          </div>
-        ) : (
-          filteredPosts.map((post) => (
+      {/* 게시글 그리드 */}
+      {filteredPosts.length === 0 ? (
+        <div className="text-center py-12 text-notion-gray-500">
+          {searchQuery ? (
+            <>
+              <p>검색 결과가 없습니다.</p>
+              <p className="text-sm mt-2">다른 키워드로 검색해보세요.</p>
+            </>
+          ) : (
+            <>
+              <p>아직 게시글이 없습니다.</p>
+              <p className="text-sm mt-2">첫 게시글을 작성해보세요!</p>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {filteredPosts.map((post) => (
             <div
               key={post.id}
               onClick={() => handlePostClick(post)}
-              className="card hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+              className="group cursor-pointer"
             >
-              {/* 이미지 슬라이더 */}
-              {post.images && post.images.length > 0 && (
-                <div className="-m-4 mb-4">
-                  <ImageSlider images={post.images} />
-                </div>
-              )}
-
-              <div className="flex items-start gap-4">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-notion-text mb-2">
-                    {post.title}
-                  </h3>
-                  {post.content && (
-                    <div className="text-sm text-notion-gray-600 mb-3 line-clamp-2">
-                      <PostContent content={post.content} />
+              <div className="aspect-square rounded-lg overflow-hidden bg-notion-gray-100 hover:shadow-lg transition-all duration-200 relative">
+                {/* 이미지가 있는 경우 */}
+                {post.images && post.images.length > 0 ? (
+                  <>
+                    <img
+                      src={post.images[0].data}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* 그라데이션 오버레이 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    {/* 제목 오버레이 */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                      <h3 className="font-semibold text-white text-sm sm:text-base line-clamp-2 mb-1">
+                        {post.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-white/80">
+                        <span>{post.date}</span>
+                        {post.images.length > 1 && (
+                          <>
+                            <span>•</span>
+                            <span>📷 {post.images.length}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  <div className="flex items-center gap-4 text-xs text-notion-gray-500 flex-wrap">
-                    <span>{post.date}</span>
-                    {post.images && post.images.length > 0 && (
-                      <>
-                        <span>•</span>
-                        <span>📷 {post.images.length}</span>
-                      </>
-                    )}
+                  </>
+                ) : (
+                  /* 이미지가 없는 경우 */
+                  <div className="w-full h-full p-3 sm:p-4 flex flex-col justify-between bg-white border border-notion-gray-200 group-hover:border-notion-gray-300 transition-colors">
+                    <div>
+                      <h3 className="font-semibold text-notion-text text-sm sm:text-base mb-2 line-clamp-3">
+                        {post.title}
+                      </h3>
+                      {post.content && (
+                        <div className="text-xs sm:text-sm text-notion-gray-600 line-clamp-4">
+                          <PostContent content={post.content} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs text-notion-gray-500 mt-2">
+                      {post.date}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* 글 작성/수정 모달 */}
       <PostWriteModal
