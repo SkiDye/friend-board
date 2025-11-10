@@ -8,7 +8,7 @@ import About from './pages/About'
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <Router basename="/friend-board">
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Board />} />
