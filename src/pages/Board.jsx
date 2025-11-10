@@ -241,21 +241,29 @@ const Board = () => {
                   </>
                 ) : (
                   /* 이미지가 없는 경우 */
-                  <div className="w-full h-full p-3 sm:p-4 flex flex-col justify-between bg-white border border-notion-gray-200 group-hover:border-notion-gray-300 transition-colors">
-                    <div>
-                      <h3 className="font-semibold text-notion-text text-sm sm:text-base mb-2 line-clamp-3">
-                        {post.title}
-                      </h3>
-                      {post.content && (
-                        <div className="text-xs sm:text-sm text-notion-gray-600 line-clamp-4">
+                  <>
+                    {/* 내용 미리보기 영역 */}
+                    <div className="w-full h-full bg-notion-gray-50 p-4 flex items-center justify-center overflow-hidden">
+                      {post.content ? (
+                        <div className="text-xs sm:text-sm text-notion-gray-600 line-clamp-6 text-center">
                           <PostContent content={post.content} />
+                        </div>
+                      ) : (
+                        <div className="text-notion-gray-400 text-sm">
+                          내용 없음
                         </div>
                       )}
                     </div>
-                    <div className="text-xs text-notion-gray-500 mt-2">
-                      {post.date}
+                    {/* 제목 영역 - 완전 검정 배경 */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black p-3 sm:p-4">
+                      <h3 className="font-semibold text-white text-sm sm:text-base mb-1">
+                        {post.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-white/80">
+                        <span>{post.date}</span>
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
