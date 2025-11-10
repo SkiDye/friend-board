@@ -218,11 +218,23 @@ const Board = () => {
                 {/* 이미지가 있는 경우 */}
                 {post.images && post.images.length > 0 ? (
                   <>
-                    <img
-                      src={post.images[0].data}
-                      alt={post.title}
-                      className="w-full h-full object-cover"
-                    />
+                    {post.images[0].type && post.images[0].type.startsWith('video/') ? (
+                      <video
+                        src={post.images[0].data}
+                        className="w-full h-full object-cover"
+                        muted
+                        loop
+                        playsInline
+                        onMouseEnter={(e) => e.target.play()}
+                        onMouseLeave={(e) => e.target.pause()}
+                      />
+                    ) : (
+                      <img
+                        src={post.images[0].data}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                     {/* 제목 영역 - 완전 검정 배경 */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black p-3 sm:p-4">
                       <h3 className="font-semibold text-white text-sm sm:text-base mb-1">
@@ -233,7 +245,7 @@ const Board = () => {
                         {post.images.length > 1 && (
                           <>
                             <span>•</span>
-                            <span>📷 {post.images.length}</span>
+                            <span>🎬 {post.images.length}</span>
                           </>
                         )}
                       </div>

@@ -19,16 +19,22 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
     }
   }, [editPost, isOpen])
 
-  // 이미지 파일 처리 (공통)
+  // 미디어 파일 처리 (이미지, 동영상, GIF, WebP)
   const processImageFiles = (files) => {
     Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) {
-        alert(`${file.name}은(는) 이미지 파일이 아닙니다.`)
+      const isImage = file.type.startsWith('image/')
+      const isVideo = file.type.startsWith('video/')
+
+      if (!isImage && !isVideo) {
+        alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다.`)
         return
       }
 
-      if (file.size > 5 * 1024 * 1024) { // 5MB 제한
-        alert(`${file.name}은(는) 5MB를 초과합니다.`)
+      // 동영상은 50MB, 이미지는 10MB 제한
+      const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024
+      if (file.size > maxSize) {
+        const limitText = isVideo ? '50MB' : '10MB'
+        alert(`${file.name}은(는) ${limitText}를 초과합니다.`)
         return
       }
 
@@ -37,7 +43,8 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
         setImages(prev => [...prev, {
           id: Date.now() + Math.random(),
           data: reader.result,
-          name: file.name
+          name: file.name,
+          type: file.type
         }])
       }
       reader.readAsDataURL(file)
@@ -171,10 +178,10 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
             />
           </div>
 
-          {/* 이미지 업로드 */}
+          {/* 미디어 업로드 */}
           <div>
             <label className="block text-sm font-medium text-notion-gray-700 mb-2">
-              이미지 (선택사항)
+              이미지/동영상 (선택사항)
             </label>
 
             {/* 드래그 앤 드롭 영역 */}
@@ -190,17 +197,17 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
               }`}
             >
               <div className="space-y-2">
-                <div className="text-4xl">📷</div>
+                <div className="text-4xl">🎬</div>
                 <p className="text-sm text-notion-gray-600">
-                  이미지를 드래그하거나 클릭하여 업로드
+                  이미지/동영상을 드래그하거나 클릭하여 업로드
                 </p>
                 <p className="text-xs text-notion-gray-500">
-                  최대 5MB, 여러 장 가능
+                  이미지: 최대 10MB | 동영상: 최대 50MB
                 </p>
               </div>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 onChange={handleImageChange}
                 className="hidden"
@@ -214,20 +221,32 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
               </label>
             </div>
 
-            {/* 이미지 미리보기 */}
+            {/* 미디어 미리보기 */}
             {images.length > 0 && (
               <div className="mt-3 space-y-2">
                 <p className="text-xs text-notion-gray-500">
-                  {images.length}장의 이미지 (화살표로 순서 조정)
+                  {images.length}개의 파일 (화살표로 순서 조정)
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {images.map((image, index) => (
                     <div key={image.id} className="relative group">
-                      <img
-                        src={image.data}
-                        alt={image.name}
-                        className="w-full h-24 object-cover rounded border border-notion-gray-200"
-                      />
+                      {image.type && image.type.startsWith('video/') ? (
+                        <video
+                          src={image.data}
+                          className="w-full h-24 object-cover rounded border border-notion-gray-200"
+                          muted
+                          loop
+                          playsInline
+                          onMouseEnter={(e) => e.target.play()}
+                          onMouseLeave={(e) => e.target.pause()}
+                        />
+                      ) : (
+                        <img
+                          src={image.data}
+                          alt={image.name}
+                          className="w-full h-24 object-cover rounded border border-notion-gray-200"
+                        />
+                      )}
 
                       {/* 삭제 버튼 */}
                       <button
