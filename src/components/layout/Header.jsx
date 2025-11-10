@@ -14,12 +14,6 @@ const Header = ({ onMenuClick }) => {
       <div className="flex-1">
         <h2 className="text-base sm:text-lg font-semibold text-notion-text">친구 게시판</h2>
       </div>
-
-      <div className="flex items-center gap-2 sm:gap-3">
-        <button className="btn-secondary text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2">
-          로그인
-        </button>
-      </div>
     </header>
   )
 }
