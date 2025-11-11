@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { deleteMultipleFiles } from '../utils/storage-upload'
 
 // 게시글 목록 조회 (갤러리용 - 썸네일만)
 export const usePosts = () => {
@@ -88,6 +89,39 @@ export const useUpdatePost = () => {
 
   return useMutation({
     mutationFn: async (postData) => {
+      // 기존 게시글 데이터 조회 (삭제할 이미지 확인용)
+      const { data: originalPost, error: fetchError } = await supabase
+        .from('posts')
+        .select('images')
+        .eq('id', postData.id)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // 삭제된 이미지 찾기 (기존에 있었지만 새 데이터에 없는 것)
+      if (originalPost.images && originalPost.images.length > 0) {
+        const newImagePaths = new Set(
+          (postData.images || [])
+            .filter(img => img.path)
+            .map(img => img.path)
+        )
+
+        const deletedImages = originalPost.images
+          .filter(img => img.path && !newImagePaths.has(img.path))
+          .map(img => img.path)
+
+        // Storage에서 삭제된 이미지 제거
+        if (deletedImages.length > 0) {
+          try {
+            await deleteMultipleFiles(deletedImages)
+          } catch (storageError) {
+            console.error('Storage 파일 삭제 실패:', storageError)
+            // Storage 삭제 실패해도 업데이트는 진행
+          }
+        }
+      }
+
+      // 게시글 업데이트
       const { data, error } = await supabase
         .from('posts')
         .update({
@@ -113,6 +147,32 @@ export const useDeletePost = () => {
 
   return useMutation({
     mutationFn: async (postId) => {
+      // 게시글 데이터 먼저 조회 (이미지 경로 확인)
+      const { data: post, error: fetchError } = await supabase
+        .from('posts')
+        .select('images')
+        .eq('id', postId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // Storage에서 이미지 파일 삭제
+      if (post.images && post.images.length > 0) {
+        const filePaths = post.images
+          .filter(img => img.path) // path가 있는 것만 (URL 기반 이미지)
+          .map(img => img.path)
+
+        if (filePaths.length > 0) {
+          try {
+            await deleteMultipleFiles(filePaths)
+          } catch (storageError) {
+            console.error('Storage 파일 삭제 실패:', storageError)
+            // Storage 삭제 실패해도 DB는 삭제 진행
+          }
+        }
+      }
+
+      // 데이터베이스에서 게시글 삭제
       const { error } = await supabase
         .from('posts')
         .delete()

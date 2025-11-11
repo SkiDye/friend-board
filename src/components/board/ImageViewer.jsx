@@ -1,3 +1,5 @@
+import LazyImage from '../common/LazyImage'
+
 const ImageViewer = ({ images }) => {
   if (!images || images.length === 0) return null
 
@@ -5,6 +7,7 @@ const ImageViewer = ({ images }) => {
     <div className="w-full space-y-2">
       {images.map((image, index) => (
         <div key={image.id || index} className="w-full bg-black">
+<<<<<<< HEAD
           {image.type && image.type.startsWith('video/') ? (
             <video
               src={image.url || image.data}
@@ -22,6 +25,15 @@ const ImageViewer = ({ images }) => {
               className="w-full h-auto object-contain"
             />
           )}
+=======
+          <LazyImage
+            src={image.url || image.data}
+            alt={image.name || 'Image'}
+            className="w-full h-auto object-contain"
+            skeletonClassName="min-h-[300px]"
+            type={image.type && image.type.startsWith('video/') ? 'video' : 'image'}
+          />
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
         </div>
       ))}
 

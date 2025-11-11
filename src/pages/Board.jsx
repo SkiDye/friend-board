@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import PostContent from '../components/board/PostContent'
 import PostWriteModal from '../components/board/PostWriteModal'
 import PostDetailModal from '../components/board/PostDetailModal'
+import LazyImage from '../components/common/LazyImage'
+import BoardSkeleton from '../components/common/BoardSkeleton'
 import { usePosts, useCreatePost, useUpdatePost, useDeletePost } from '../hooks/usePosts'
 
 const Board = () => {
@@ -116,13 +118,24 @@ const Board = () => {
     setEditPost(null)
   }
 
-  // 로딩 중이거나 에러 상태 처리
+  // 로딩 중 - 스켈레톤 그리드 표시
   if (isLoading) {
     return (
       <div className="max-w-5xl mx-auto p-4 sm:p-8">
-        <div className="text-center py-12 text-notion-gray-500">
-          <p>게시글을 불러오는 중...</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-notion-text">게시판</h1>
+          <button className="btn-primary w-full sm:w-auto opacity-50 cursor-not-allowed" disabled>
+            + 새 글 작성
+          </button>
         </div>
+
+        {/* 검색창 스켈레톤 */}
+        <div className="mb-6">
+          <div className="w-full h-12 bg-notion-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+
+        {/* 게시글 그리드 스켈레톤 */}
+        <BoardSkeleton count={8} />
       </div>
     )
   }
@@ -218,6 +231,7 @@ const Board = () => {
                 {/* 이미지가 있는 경우 */}
                 {post.thumbnail ? (
                   <>
+<<<<<<< HEAD
                     {post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? (
                       <video
                         src={post.thumbnail.url || post.thumbnail.data}
@@ -237,6 +251,14 @@ const Board = () => {
                         className="w-full h-full object-cover"
                       />
                     )}
+=======
+                    <LazyImage
+                      src={post.thumbnail.url || post.thumbnail.data}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                      type={post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? 'video' : 'image'}
+                    />
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
                     {/* 제목 영역 - 완전 검정 배경 */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black p-3 sm:p-4">
                       <h3 className="font-semibold text-white text-sm sm:text-base mb-1">

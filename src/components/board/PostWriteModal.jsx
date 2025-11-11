@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react"
+<<<<<<< HEAD
 import { uploadMultipleFiles } from "../../utils/storageUpload"
+=======
+import { uploadMultipleFiles } from "../../utils/storage-upload"
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
 
 const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
   const [title, setTitle] = useState("")
@@ -7,7 +11,10 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
   const [images, setImages] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+<<<<<<< HEAD
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: '' })
+=======
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
 
   // 수정 모드일 때 기존 값 채우기
   useEffect(() => {
@@ -45,6 +52,7 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
       }
     }
 
+<<<<<<< HEAD
     // Storage에 업로드
     setIsUploading(true)
 
@@ -72,6 +80,22 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
       setIsUploading(false)
       setUploadProgress({ current: 0, total: 0, fileName: '' })
     }
+=======
+      // 미리보기를 위한 임시 URL 생성
+      const previewUrl = URL.createObjectURL(file)
+
+      setImages(prev => [...prev, {
+        id: Date.now() + Math.random(),
+        file: file, // 실제 File 객체 저장 (업로드용)
+        previewUrl: previewUrl, // 미리보기 URL
+        name: file.name,
+        type: file.type,
+        // 수정 모드에서 기존 이미지인 경우 url과 path가 있을 수 있음
+        url: null,
+        path: null
+      }])
+    })
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
   }
 
   // 이미지 파일 선택 핸들러
@@ -121,7 +145,7 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
     setImages(newImages)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!title.trim()) {
@@ -134,18 +158,62 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
       return
     }
 
-    onSubmit({
-      ...(editPost && { id: editPost.id }),
-      title: title.trim(),
-      content: content.trim(),
-      images: images
-    })
+    try {
+      setIsUploading(true)
 
-    // 폼 초기화
-    setTitle("")
-    setContent("")
-    setImages([])
-    onClose()
+      // 새로운 파일들을 Storage에 업로드
+      const filesToUpload = images.filter(img => img.file && !img.url)
+      const existingImages = images.filter(img => img.url) // 수정 모드에서 기존 이미지
+
+      let uploadedImages = []
+      if (filesToUpload.length > 0) {
+        const files = filesToUpload.map(img => img.file)
+        uploadedImages = await uploadMultipleFiles(files, 'posts')
+      }
+
+      // 최종 이미지 배열: 기존 이미지 + 새 업로드 이미지
+      const finalImages = [
+        ...existingImages.map(img => ({
+          id: img.id,
+          url: img.url,
+          path: img.path,
+          name: img.name,
+          type: img.type
+        })),
+        ...uploadedImages.map((img, index) => ({
+          id: filesToUpload[index].id,
+          url: img.url,
+          path: img.path,
+          name: img.name,
+          type: img.type
+        }))
+      ]
+
+      // 미리보기 URL 메모리 해제
+      images.forEach(img => {
+        if (img.previewUrl) {
+          URL.revokeObjectURL(img.previewUrl)
+        }
+      })
+
+      onSubmit({
+        ...(editPost && { id: editPost.id }),
+        title: title.trim(),
+        content: content.trim(),
+        images: finalImages
+      })
+
+      // 폼 초기화
+      setTitle("")
+      setContent("")
+      setImages([])
+      onClose()
+    } catch (error) {
+      console.error('업로드 실패:', error)
+      alert('파일 업로드에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -255,7 +323,11 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
                     <div key={image.id} className="relative group">
                       {image.type && image.type.startsWith('video/') ? (
                         <video
+<<<<<<< HEAD
                           src={image.url || image.data}
+=======
+                          src={image.url || image.previewUrl}
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
                           className="w-full h-24 object-cover rounded border border-notion-gray-200"
                           muted
                           loop
@@ -265,9 +337,14 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
                         />
                       ) : (
                         <img
+<<<<<<< HEAD
                           src={image.url || image.data}
+=======
+                          src={image.url || image.previewUrl}
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
                           alt={image.name}
                           className="w-full h-24 object-cover rounded border border-notion-gray-200"
+                          loading="lazy"
                         />
                       )}
 
@@ -359,8 +436,13 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
           </button>
           <button
             onClick={handleSubmit}
+<<<<<<< HEAD
             disabled={isUploading}
             className="btn-primary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed"
+=======
+            className="btn-primary flex-1 sm:flex-none"
+            disabled={isUploading}
+>>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
           >
             {isUploading ? "업로드 중..." : (isEditMode ? "수정하기" : "작성하기")}
           </button>

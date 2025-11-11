@@ -43,3 +43,42 @@ export const getUsagePercentage = (usedBytes) => {
   const SUPABASE_DB_LIMIT = 500 * 1024 * 1024 // 500MB
   return ((usedBytes / SUPABASE_DB_LIMIT) * 100).toFixed(4)
 }
+
+/**
+ * Supabase Storage 용량 대비 사용률 계산 (%)
+ */
+export const getStorageUsagePercentage = (usedBytes) => {
+  const SUPABASE_STORAGE_LIMIT = 1024 * 1024 * 1024 // 1GB
+  return ((usedBytes / SUPABASE_STORAGE_LIMIT) * 100).toFixed(4)
+}
+
+/**
+ * 전체 사용률 계산 (DB + Storage)
+ */
+export const getTotalUsagePercentage = (dbBytes, storageBytes) => {
+  const SUPABASE_DB_LIMIT = 500 * 1024 * 1024 // 500MB
+  const SUPABASE_STORAGE_LIMIT = 1024 * 1024 * 1024 // 1GB
+  const TOTAL_LIMIT = SUPABASE_DB_LIMIT + SUPABASE_STORAGE_LIMIT // 1.5GB
+  return (((dbBytes + storageBytes) / TOTAL_LIMIT) * 100).toFixed(2)
+}
+
+/**
+ * posts 데이터에서 Storage 사용량 계산
+ * images 배열의 size 필드를 합산
+ */
+export const getStorageSizeFromPosts = (posts) => {
+  return posts.reduce((total, post) => {
+    if (!post.images || post.images.length === 0) return total
+
+    const postStorageSize = post.images.reduce((sum, image) => {
+      // Storage에 저장된 파일만 계산 (url이 있고 size가 있는 경우)
+      if (image.url && image.size) {
+        return sum + image.size
+      }
+      // base64 데이터는 제외 (url이 없고 data만 있는 경우)
+      return sum
+    }, 0)
+
+    return total + postStorageSize
+  }, 0)
+}

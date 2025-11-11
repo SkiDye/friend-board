@@ -1,16 +1,45 @@
+import { useState, useEffect } from 'react'
 import StorageInfo from '../components/common/StorageInfo'
 import { usePostsForStorage } from '../hooks/usePosts'
 import { getTotalPostsSize } from '../utils/storage'
+import { getStorageUsage } from '../utils/storage-upload'
 
 const About = () => {
-  // 저장공간 계산용 전체 데이터 로드
+  // DB 저장공간 계산용 전체 데이터 로드
   const { data: posts = [], isLoading } = usePostsForStorage()
-  const usedBytes = isLoading ? 0 : getTotalPostsSize(posts)
+  const dbUsedBytes = isLoading ? 0 : getTotalPostsSize(posts)
+
+  // Supabase Storage 사용량 조회 (실제 파일 크기)
+  const [storageUsedBytes, setStorageUsedBytes] = useState(0)
+  const [isLoadingStorage, setIsLoadingStorage] = useState(true)
+
+  useEffect(() => {
+    const fetchStorageUsage = async () => {
+      try {
+        setIsLoadingStorage(true)
+        const usage = await getStorageUsage()
+        setStorageUsedBytes(usage)
+      } catch (error) {
+        console.error('Storage 사용량 조회 실패:', error)
+        setStorageUsedBytes(0)
+      } finally {
+        setIsLoadingStorage(false)
+      }
+    }
+
+    fetchStorageUsage()
+  }, [])
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       {/* 저장 공간 정보 */}
-      <StorageInfo usedBytes={usedBytes} />
+      {(isLoading || isLoadingStorage) ? (
+        <div className="card">
+          <p className="text-center text-notion-gray-500">저장 공간 사용량 계산 중...</p>
+        </div>
+      ) : (
+        <StorageInfo dbUsedBytes={dbUsedBytes} storageUsedBytes={storageUsedBytes} />
+      )}
 
       {/* 프로젝트 정보 */}
       <div className="card">
