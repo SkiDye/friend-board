@@ -2,8 +2,8 @@ import { formatBytes, getUsagePercentage } from "../../utils/storage"
 
 const StorageInfo = ({ usedBytes }) => {
   const usagePercent = parseFloat(getUsagePercentage(usedBytes))
-  const githubLimit = 1024 * 1024 * 1024 // 1GB
-  const remaining = githubLimit - usedBytes
+  const supabaseLimit = 500 * 1024 * 1024 // 500MB (Supabase Free DB)
+  const remaining = supabaseLimit - usedBytes
 
   // 진행바 색상 결정
   const getProgressColor = (percent) => {
@@ -21,7 +21,7 @@ const StorageInfo = ({ usedBytes }) => {
       <div className="mb-4">
         <div className="flex justify-between text-sm text-notion-gray-600 mb-2">
           <span>사용 중: {formatBytes(usedBytes)}</span>
-          <span>전체: {formatBytes(githubLimit)}</span>
+          <span>전체: {formatBytes(supabaseLimit)}</span>
         </div>
         <div className="w-full bg-notion-gray-200 rounded-full h-3 overflow-hidden">
           <div
@@ -48,10 +48,13 @@ const StorageInfo = ({ usedBytes }) => {
 
       {/* 안내 메시지 */}
       <div className="mt-4 text-xs text-notion-gray-500 bg-notion-gray-50 p-3 rounded">
-        💡 <strong>GitHub Pages 무료 플랜:</strong> 최대 1GB까지 사용 가능합니다.
+        💡 <strong>Supabase 무료 플랜 (Database):</strong> 최대 500MB까지 사용 가능합니다.
+        <div className="mt-1 text-notion-gray-500">
+          이미지와 동영상이 Database에 저장되므로 대용량 파일 업로드 시 주의하세요.
+        </div>
         {usagePercent > 80 && (
           <div className="mt-2 text-orange-600 font-medium">
-            ⚠️ 저장 공간이 부족합니다. 오래된 게시글을 삭제하는 것을 고려해보세요.
+            ⚠️ 저장 공간이 부족합니다. 오래된 게시글이나 대용량 파일을 삭제하세요.
           </div>
         )}
       </div>

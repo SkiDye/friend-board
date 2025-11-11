@@ -37,9 +37,9 @@ export const formatBytes = (bytes, decimals = 2) => {
 }
 
 /**
- * GitHub Pages 용량 대비 사용률 계산 (%)
+ * Supabase Database 용량 대비 사용률 계산 (%)
  */
 export const getUsagePercentage = (usedBytes) => {
-  const GITHUB_PAGES_LIMIT = 1024 * 1024 * 1024 // 1GB
-  return ((usedBytes / GITHUB_PAGES_LIMIT) * 100).toFixed(4)
+  const SUPABASE_DB_LIMIT = 500 * 1024 * 1024 // 500MB
+  return ((usedBytes / SUPABASE_DB_LIMIT) * 100).toFixed(4)
 }
