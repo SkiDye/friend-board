@@ -1,26 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 
-// 게시글 목록 조회
+// 게시글 목록 조회 (갤러리용 - 썸네일만)
 export const usePosts = () => {
   const query = useQuery({
     queryKey: ['posts'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select('id, title, content, created_at, images, comments')
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
-      // DB 데이터를 앱 형식으로 변환
+      // 갤러리용으로 최적화: 첫 번째 이미지만, 댓글 개수만
       return data.map(post => ({
         id: post.id,
         title: post.title,
         content: post.content || '',
         date: new Date(post.created_at).toISOString().split('T')[0],
-        images: post.images || [],
-        comments: post.comments || []
+        // 첫 번째 이미지만 포함 (갤러리 표시용)
+        thumbnail: post.images && post.images.length > 0 ? post.images[0] : null,
+        imageCount: post.images ? post.images.length : 0,
+        commentCount: post.comments ? post.comments.length : 0
       }))
     },
     // 30초마다 자동으로 새 데이터 확인 (선택사항)
@@ -28,6 +30,32 @@ export const usePosts = () => {
   })
 
   return query
+}
+
+// 게시글 상세 조회 (클릭 시 전체 데이터 로드)
+export const usePost = (postId) => {
+  return useQuery({
+    queryKey: ['post', postId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
+        .single()
+
+      if (error) throw error
+
+      return {
+        id: data.id,
+        title: data.title,
+        content: data.content || '',
+        date: new Date(data.created_at).toISOString().split('T')[0],
+        images: data.images || [],
+        comments: data.comments || []
+      }
+    },
+    enabled: !!postId // postId가 있을 때만 실행
+  })
 }
 
 // 게시글 생성

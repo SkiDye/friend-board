@@ -7,7 +7,7 @@ import { usePosts, useCreatePost, useUpdatePost, useDeletePost } from '../hooks/
 const Board = () => {
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [selectedPost, setSelectedPost] = useState(null)
+  const [selectedPostId, setSelectedPostId] = useState(null)
   const [editPost, setEditPost] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -74,7 +74,7 @@ const Board = () => {
 
   // 게시글 클릭 - 상세보기
   const handlePostClick = (post) => {
-    setSelectedPost(post)
+    setSelectedPostId(post.id)
     setIsDetailModalOpen(true)
   }
 
@@ -216,11 +216,11 @@ const Board = () => {
             >
               <div className="aspect-square rounded-lg overflow-hidden bg-notion-gray-100 hover:shadow-lg transition-all duration-200 relative">
                 {/* 이미지가 있는 경우 */}
-                {post.images && post.images.length > 0 ? (
+                {post.thumbnail ? (
                   <>
-                    {post.images[0].type && post.images[0].type.startsWith('video/') ? (
+                    {post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? (
                       <video
-                        src={post.images[0].data}
+                        src={post.thumbnail.data}
                         className="w-full h-full object-cover"
                         muted
                         loop
@@ -230,7 +230,7 @@ const Board = () => {
                       />
                     ) : (
                       <img
-                        src={post.images[0].data}
+                        src={post.thumbnail.data}
                         alt={post.title}
                         className="w-full h-full object-cover"
                       />
@@ -242,10 +242,10 @@ const Board = () => {
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-white/80">
                         <span>{post.date}</span>
-                        {post.images.length > 1 && (
+                        {post.imageCount > 1 && (
                           <>
                             <span>•</span>
-                            <span>🎬 {post.images.length}</span>
+                            <span>🎬 {post.imageCount}</span>
                           </>
                         )}
                       </div>
@@ -294,7 +294,7 @@ const Board = () => {
       {/* 글 상세보기 모달 */}
       <PostDetailModal
         isOpen={isDetailModalOpen}
-        post={selectedPost}
+        postId={selectedPostId}
         onClose={() => setIsDetailModalOpen(false)}
         onEdit={handleEditPost}
         onDelete={handleDeletePost}

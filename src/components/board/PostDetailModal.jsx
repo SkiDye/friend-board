@@ -1,14 +1,29 @@
 import { useState } from "react"
 import PostContent from "./PostContent"
 import ImageViewer from "./ImageViewer"
-import { useAddComment, useDeleteComment } from "../../hooks/usePosts"
+import { usePost, useAddComment, useDeleteComment } from "../../hooks/usePosts"
 
-const PostDetailModal = ({ isOpen, post, onClose, onEdit, onDelete }) => {
+const PostDetailModal = ({ isOpen, postId, onClose, onEdit, onDelete }) => {
   const [commentText, setCommentText] = useState("")
+
+  // 상세 데이터 로드 (클릭 시에만)
+  const { data: post, isLoading } = usePost(postId)
   const addCommentMutation = useAddComment()
   const deleteCommentMutation = useDeleteComment()
 
-  if (!isOpen || !post) return null
+  if (!isOpen || !postId) return null
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg p-8">
+          <p className="text-notion-text">로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!post) return null
 
   const handleDelete = () => {
     if (window.confirm("정말 이 게시글을 삭제하시겠습니까?")) {
