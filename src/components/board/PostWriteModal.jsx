@@ -30,10 +30,10 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
         return
       }
 
-      // 동영상은 50MB, 이미지는 10MB 제한
-      const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024
+      // 동영상은 100MB, 이미지는 50MB 제한
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 50 * 1024 * 1024
       if (file.size > maxSize) {
-        const limitText = isVideo ? '50MB' : '10MB'
+        const limitText = isVideo ? '100MB' : '50MB'
         alert(`${file.name}은(는) ${limitText}를 초과합니다.`)
         return
       }
@@ -202,7 +202,7 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
                   이미지/동영상을 드래그하거나 클릭하여 업로드
                 </p>
                 <p className="text-xs text-notion-gray-500">
-                  이미지: 최대 10MB | 동영상: 최대 50MB
+                  이미지: 최대 50MB | 동영상: 최대 100MB
                 </p>
               </div>
               <input
