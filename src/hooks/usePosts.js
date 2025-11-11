@@ -19,7 +19,8 @@ export const usePosts = () => {
         title: post.title,
         content: post.content || '',
         date: new Date(post.created_at).toISOString().split('T')[0],
-        images: post.images || []
+        images: post.images || [],
+        comments: post.comments || []
       }))
     },
     // 30초마다 자동으로 새 데이터 확인 (선택사항)
@@ -90,6 +91,78 @@ export const useDeletePost = () => {
         .eq('id', postId)
 
       if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    }
+  })
+}
+
+// 댓글 추가
+export const useAddComment = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ postId, commentText }) => {
+      // 현재 게시글 가져오기
+      const { data: post, error: fetchError } = await supabase
+        .from('posts')
+        .select('comments')
+        .eq('id', postId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // 새 댓글 추가
+      const newComment = {
+        id: Date.now() + Math.random(),
+        text: commentText,
+        created_at: new Date().toISOString()
+      }
+
+      const updatedComments = [...(post.comments || []), newComment]
+
+      // 업데이트
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ comments: updatedComments })
+        .eq('id', postId)
+
+      if (updateError) throw updateError
+
+      return newComment
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    }
+  })
+}
+
+// 댓글 삭제
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ postId, commentId }) => {
+      // 현재 게시글 가져오기
+      const { data: post, error: fetchError } = await supabase
+        .from('posts')
+        .select('comments')
+        .eq('id', postId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // 댓글 삭제
+      const updatedComments = (post.comments || []).filter(c => c.id !== commentId)
+
+      // 업데이트
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ comments: updatedComments })
+        .eq('id', postId)
+
+      if (updateError) throw updateError
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
