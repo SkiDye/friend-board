@@ -220,7 +220,7 @@ const Board = () => {
                   <>
                     {post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? (
                       <video
-                        src={post.thumbnail.data}
+                        src={post.thumbnail.url || post.thumbnail.data}
                         className="w-full h-full object-cover"
                         muted
                         loop
@@ -230,7 +230,7 @@ const Board = () => {
                       />
                     ) : (
                       <img
-                        src={post.thumbnail.data}
+                        src={post.thumbnail.url || post.thumbnail.data}
                         alt={post.title}
                         className="w-full h-full object-cover"
                       />

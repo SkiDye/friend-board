@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react"
+import { uploadMultipleFiles } from "../../utils/storageUpload"
 
 const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [images, setImages] = useState([])
   const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, fileName: '' })
 
   // 수정 모드일 때 기존 값 채우기
   useEffect(() => {
@@ -19,9 +22,12 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
     }
   }, [editPost, isOpen])
 
-  // 미디어 파일 처리 (이미지, 동영상, GIF, WebP)
-  const processImageFiles = (files) => {
-    Array.from(files).forEach(file => {
+  // 미디어 파일 처리 (Storage 업로드)
+  const processImageFiles = async (files) => {
+    const fileArray = Array.from(files)
+
+    // 파일 형식 검증
+    for (const file of fileArray) {
       const isImage = file.type.startsWith('image/')
       const isVideo = file.type.startsWith('video/')
 
@@ -37,18 +43,35 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
         alert(`${file.name}은(는) ${limitText}를 초과합니다.`)
         return
       }
+    }
 
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImages(prev => [...prev, {
-          id: Date.now() + Math.random(),
-          data: reader.result,
-          name: file.name,
-          type: file.type
-        }])
+    // Storage에 업로드
+    setIsUploading(true)
+
+    try {
+      const results = await uploadMultipleFiles(fileArray, (current, total, fileName) => {
+        setUploadProgress({ current, total, fileName })
+      })
+
+      // 업로드 실패한 파일 확인
+      const failedFiles = results.filter(r => r.error)
+      if (failedFiles.length > 0) {
+        const failedNames = failedFiles.map(f => f.name).join(', ')
+        alert(`다음 파일 업로드에 실패했습니다: ${failedNames}`)
       }
-      reader.readAsDataURL(file)
-    })
+
+      // 성공한 파일만 추가
+      const successFiles = results.filter(r => !r.error)
+      if (successFiles.length > 0) {
+        setImages(prev => [...prev, ...successFiles])
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('파일 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setIsUploading(false)
+      setUploadProgress({ current: 0, total: 0, fileName: '' })
+    }
   }
 
   // 이미지 파일 선택 핸들러
@@ -232,7 +255,7 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
                     <div key={image.id} className="relative group">
                       {image.type && image.type.startsWith('video/') ? (
                         <video
-                          src={image.data}
+                          src={image.url || image.data}
                           className="w-full h-24 object-cover rounded border border-notion-gray-200"
                           muted
                           loop
@@ -242,7 +265,7 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
                         />
                       ) : (
                         <img
-                          src={image.data}
+                          src={image.url || image.data}
                           alt={image.name}
                           className="w-full h-24 object-cover rounded border border-notion-gray-200"
                         />
@@ -299,6 +322,25 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
             )}
           </div>
 
+          {/* 업로드 진행 상황 */}
+          {isUploading && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-900">
+                    파일 업로드 중... ({uploadProgress.current}/{uploadProgress.total})
+                  </p>
+                  {uploadProgress.fileName && (
+                    <p className="text-xs text-blue-700 mt-1">
+                      {uploadProgress.fileName}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 도움말 */}
           <div className="text-xs text-notion-gray-500 bg-notion-gray-50 p-3 rounded">
             💡 <strong>팁:</strong> 유튜브 링크를 본문에 붙여넣으면 자동으로 영상 플레이어가 표시됩니다.
@@ -317,9 +359,10 @@ const PostWriteModal = ({ isOpen, onClose, onSubmit, editPost }) => {
           </button>
           <button
             onClick={handleSubmit}
-            className="btn-primary flex-1 sm:flex-none"
+            disabled={isUploading}
+            className="btn-primary flex-1 sm:flex-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isEditMode ? "수정하기" : "작성하기"}
+            {isUploading ? "업로드 중..." : (isEditMode ? "수정하기" : "작성하기")}
           </button>
         </div>
       </div>

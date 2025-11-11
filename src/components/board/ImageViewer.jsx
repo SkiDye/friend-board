@@ -7,7 +7,7 @@ const ImageViewer = ({ images }) => {
         <div key={image.id || index} className="w-full bg-black">
           {image.type && image.type.startsWith('video/') ? (
             <video
-              src={image.data}
+              src={image.url || image.data}
               className="w-full h-auto object-contain"
               controls
               playsInline
@@ -15,14 +15,14 @@ const ImageViewer = ({ images }) => {
             />
           ) : (
             <img
-              src={image.data}
+              src={image.url || image.data}
               alt={image.name || 'Image'}
               className="w-full h-auto object-contain"
             />
           )}
         </div>
       ))}
-      
+
       {images.length > 1 && (
         <div className="text-center py-2">
           <span className="text-xs text-notion-gray-500">
