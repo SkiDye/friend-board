@@ -225,8 +225,10 @@ const Board = () => {
                         muted
                         loop
                         playsInline
+                        volume="0.5"
                         onMouseEnter={(e) => e.target.play()}
                         onMouseLeave={(e) => e.target.pause()}
+                        onLoadedMetadata={(e) => { e.target.volume = 0.5 }}
                       />
                     ) : (
                       <img

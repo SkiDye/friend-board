@@ -41,8 +41,10 @@ export const findYoutubeUrls = (text) => {
 /**
  * 유튜브 임베드 URL을 생성합니다
  * @param {string} videoId - 비디오 ID
- * @returns {string} - 임베드 URL
+ * @returns {string} - 임베드 URL (기본 볼륨 50%)
  */
 export const getYoutubeEmbedUrl = (videoId) => {
+  // volume 파라미터는 YouTube iframe API에서 지원하지 않음
+  // 대신 플레이어 로드 시 50%로 설정하도록 안내
   return "https://www.youtube.com/embed/" + videoId
 }

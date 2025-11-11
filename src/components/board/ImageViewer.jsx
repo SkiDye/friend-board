@@ -12,6 +12,8 @@ const ImageViewer = ({ images }) => {
               controls
               playsInline
               loop
+              volume="0.5"
+              onLoadedMetadata={(e) => { e.target.volume = 0.5 }}
             />
           ) : (
             <img
