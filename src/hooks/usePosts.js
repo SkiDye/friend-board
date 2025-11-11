@@ -197,3 +197,27 @@ export const useDeleteComment = () => {
     }
   })
 }
+
+// 저장공간 계산용 - 전체 데이터 조회
+export const usePostsForStorage = () => {
+  return useQuery({
+    queryKey: ['posts-storage'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+
+      if (error) throw error
+
+      return data.map(post => ({
+        id: post.id,
+        title: post.title,
+        content: post.content || '',
+        images: post.images || [],
+        comments: post.comments || []
+      }))
+    },
+    staleTime: 60000, // 1분간 캐시
+    refetchInterval: false // 자동 새로고침 비활성화
+  })
+}

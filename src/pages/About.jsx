@@ -1,10 +1,10 @@
 import StorageInfo from '../components/common/StorageInfo'
-import { usePosts } from '../hooks/usePosts'
+import { usePostsForStorage } from '../hooks/usePosts'
 import { getTotalPostsSize } from '../utils/storage'
 
 const About = () => {
-  // 실제 게시글 데이터에서 용량 계산
-  const { data: posts = [], isLoading } = usePosts()
+  // 저장공간 계산용 전체 데이터 로드
+  const { data: posts = [], isLoading } = usePostsForStorage()
   const usedBytes = isLoading ? 0 : getTotalPostsSize(posts)
 
   return (
