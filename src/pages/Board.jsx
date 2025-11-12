@@ -19,6 +19,23 @@ const Board = () => {
   const updatePost = useUpdatePost()
   const deletePost = useDeletePost()
 
+  // 게시판에서 뒤로가기 방지 (페이지 탈출 방지)
+  useEffect(() => {
+    // 히스토리 엔트리 추가 (뒤로가기 버퍼)
+    window.history.pushState(null, '', window.location.href)
+
+    const handlePopState = (event) => {
+      // 게시판에서 뒤로가기 시 다시 게시판으로
+      window.history.pushState(null, '', window.location.href)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [])
+
   // 검색 필터링
   const filteredPosts = posts.filter(post => {
     if (!searchQuery.trim()) return true
