@@ -2,18 +2,58 @@ import { findYoutubeUrls } from "../../utils/youtube"
 import YoutubePlayer from "../common/YoutubePlayer"
 
 /**
- * 게시글 내용을 표시하며, 유튜브 링크를 자동으로 플레이어로 변환합니다
+ * 텍스트에서 URL을 찾아 하이퍼링크로 변환
+ */
+const linkifyText = (text) => {
+  // URL 정규식 (http, https로 시작)
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    // URL 앞의 텍스트
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index))
+    }
+
+    // URL을 링크로 변환
+    parts.push(
+      <a
+        key={match.index}
+        href={match[0]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 underline break-all"
+      >
+        {match[0]}
+      </a>
+    )
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // 마지막 남은 텍스트
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex))
+  }
+
+  return parts.length > 0 ? parts : text
+}
+
+/**
+ * 게시글 내용을 표시하며, 유튜브 링크를 자동으로 플레이어로 변환하고 일반 URL은 하이퍼링크로 변환합니다
  */
 const PostContent = ({ content }) => {
   if (!content) return null
-  
+
   const youtubeUrls = findYoutubeUrls(content)
-  
-  // 유튜브 링크가 없으면 일반 텍스트만 표시
+
+  // 유튜브 링크가 없으면 일반 텍스트만 표시 (링크는 변환)
   if (youtubeUrls.length === 0) {
     return (
       <div className="whitespace-pre-wrap break-words">
-        {content}
+        {linkifyText(content)}
       </div>
     )
   }
@@ -62,7 +102,7 @@ const PostContent = ({ content }) => {
         }
         return (
           <div key={part.key} className="whitespace-pre-wrap break-words">
-            {part.content}
+            {linkifyText(part.content)}
           </div>
         )
       })}
