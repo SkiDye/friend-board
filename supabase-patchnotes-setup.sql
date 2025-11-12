@@ -14,6 +14,12 @@ CREATE INDEX IF NOT EXISTS patch_notes_created_at_idx ON patch_notes(created_at 
 -- RLS (Row Level Security) 활성화
 ALTER TABLE patch_notes ENABLE ROW LEVEL SECURITY;
 
+-- 기존 정책 삭제 (중복 방지)
+DROP POLICY IF EXISTS "Anyone can read patch notes" ON patch_notes;
+DROP POLICY IF EXISTS "Anyone can insert patch notes" ON patch_notes;
+DROP POLICY IF EXISTS "Anyone can update patch notes" ON patch_notes;
+DROP POLICY IF EXISTS "Anyone can delete patch notes" ON patch_notes;
+
 -- 정책: 누구나 읽기 가능
 CREATE POLICY "Anyone can read patch notes"
 ON patch_notes FOR SELECT
