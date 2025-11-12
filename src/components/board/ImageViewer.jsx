@@ -6,7 +6,7 @@ const ImageViewer = ({ images }) => {
   return (
     <div className="w-full space-y-2">
       {images.map((image, index) => (
-        <div key={image.id || index} className="w-full bg-black px-4 sm:px-6 md:px-8 py-2">
+        <div key={image.id || index} className="w-full bg-black px-6 sm:px-8 md:px-12 py-3">
           <LazyImage
             src={image.url || image.data}
             alt={image.name || 'Image'}
