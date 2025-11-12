@@ -1,0 +1,12 @@
+{
+  "name": "Friend Board - 우리들의 쉼터",
+  "short_name": "Friend Board",
+  "description": "친구들과 함께하는 공간, 추억을 공유하는 게시판",
+  "start_url": "/friend-board/",
+  "scope": "/friend-board/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "icons": []
+}
