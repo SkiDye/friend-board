@@ -231,34 +231,12 @@ const Board = () => {
                 {/* 이미지가 있는 경우 */}
                 {post.thumbnail ? (
                   <>
-<<<<<<< HEAD
-                    {post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? (
-                      <video
-                        src={post.thumbnail.url || post.thumbnail.data}
-                        className="w-full h-full object-cover"
-                        muted
-                        loop
-                        playsInline
-                        volume="0.5"
-                        onMouseEnter={(e) => e.target.play()}
-                        onMouseLeave={(e) => e.target.pause()}
-                        onLoadedMetadata={(e) => { e.target.volume = 0.5 }}
-                      />
-                    ) : (
-                      <img
-                        src={post.thumbnail.url || post.thumbnail.data}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-=======
                     <LazyImage
                       src={post.thumbnail.url || post.thumbnail.data}
                       alt={post.title}
                       className="w-full h-full object-cover"
                       type={post.thumbnail.type && post.thumbnail.type.startsWith('video/') ? 'video' : 'image'}
                     />
->>>>>>> 7907bd6 (Migrate to Supabase Storage and improve loading performance)
                     {/* 제목 영역 - 완전 검정 배경 */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black p-3 sm:p-4">
                       <h3 className="font-semibold text-white text-sm sm:text-base mb-1">

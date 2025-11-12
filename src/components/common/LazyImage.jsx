@@ -3,7 +3,7 @@ import { useState } from 'react'
 /**
  * 이미지 로딩 상태를 관리하며 점진적으로 표시하는 컴포넌트
  */
-const LazyImage = ({ src, alt, className, skeletonClassName, type = 'image' }) => {
+const LazyImage = ({ src, alt, className, skeletonClassName, type = 'image', controls = false }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
 
@@ -34,7 +34,14 @@ const LazyImage = ({ src, alt, className, skeletonClassName, type = 'image' }) =
           className={`${className} ${!isLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
           onLoadedData={handleLoad}
           onError={handleError}
-          muted
+          onLoadedMetadata={(e) => { e.target.volume = 0.5 }}
+          {...(controls ? {
+            controls: true
+          } : {
+            onMouseEnter: (e) => e.target.play(),
+            onMouseLeave: (e) => e.target.pause(),
+            muted: true
+          })}
           loop
           playsInline
         />
