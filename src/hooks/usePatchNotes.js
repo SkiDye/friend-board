@@ -9,7 +9,7 @@ export const usePatchNotes = () => {
       const { data, error } = await supabase
         .from('patch_notes')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
 
       if (error) throw error
 
