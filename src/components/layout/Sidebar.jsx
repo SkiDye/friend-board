@@ -5,7 +5,7 @@ const Sidebar = ({ isMobileOpen, onClose }) => {
 
   const menuItems = [
     { path: "/", label: "게시판", icon: "📝" },
-    { path: "/patch-notes", label: "패치노트", icon: "📋" },
+    { path: "/dev-history", label: "개발 히스토리", icon: "📋" },
     { path: "/about", label: "소개", icon: "ℹ️" },
   ]
 

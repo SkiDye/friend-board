@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import { usePatchNotes, useCreatePatchNote, useUpdatePatchNote, useDeletePatchNote } from '../hooks/usePatchNotes'
+import { useDevelopmentHistory, useCreateHistory, useUpdateHistory, useDeleteHistory } from '../hooks/useDevelopmentHistory'
 import ReactMarkdown from 'react-markdown'
 
-const PatchNotes = () => {
+const DevelopmentHistory = () => {
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
   const [editNote, setEditNote] = useState(null)
 
-  const { data: patchNotes = [], isLoading } = usePatchNotes()
-  const createNote = useCreatePatchNote()
-  const updateNote = useUpdatePatchNote()
-  const deleteNote = useDeletePatchNote()
+  const { data: historyNotes = [], isLoading } = useDevelopmentHistory()
+  const createNote = useCreateHistory()
+  const updateNote = useUpdateHistory()
+  const deleteNote = useDeleteHistory()
 
   const handleSubmit = async (noteData) => {
     try {
@@ -21,13 +21,13 @@ const PatchNotes = () => {
       setIsWriteModalOpen(false)
       setEditNote(null)
     } catch (error) {
-      console.error('패치노트 저장 실패:', error)
+      console.error('개발 히스토리 저장 실패:', error)
       alert('저장에 실패했습니다.')
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('이 패치노트를 삭제하시겠습니까?')) {
+    if (window.confirm('이 개발 히스토리를 삭제하시겠습니까?')) {
       try {
         await deleteNote.mutateAsync(id)
       } catch (error) {
@@ -55,8 +55,8 @@ const PatchNotes = () => {
       {/* 헤더 */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-notion-text mb-2">패치노트</h1>
-          <p className="text-notion-gray-500 text-sm">Friend Board의 업데이트 내역입니다</p>
+          <h1 className="text-3xl font-bold text-notion-text mb-2">개발 히스토리</h1>
+          <p className="text-notion-gray-500 text-sm">Friend Board의 개발 변천사입니다</p>
         </div>
         <button
           onClick={() => {
@@ -65,7 +65,7 @@ const PatchNotes = () => {
           }}
           className="btn-primary w-full sm:w-auto"
         >
-          + 새 패치노트
+          + 새 히스토리
         </button>
       </div>
 
@@ -74,15 +74,15 @@ const PatchNotes = () => {
         {/* 타임라인 선 */}
         <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-notion-gray-200" />
 
-        {/* 패치노트 리스트 */}
+        {/* 개발 히스토리 리스트 */}
         <div className="space-y-8">
-          {patchNotes.length === 0 ? (
+          {historyNotes.length === 0 ? (
             <div className="text-center py-12 text-notion-gray-500">
-              <p>아직 패치노트가 없습니다.</p>
-              <p className="text-sm mt-2">첫 패치노트를 작성해보세요!</p>
+              <p>아직 개발 히스토리가 없습니다.</p>
+              <p className="text-sm mt-2">첫 히스토리를 작성해보세요!</p>
             </div>
           ) : (
-            patchNotes.map((note, index) => (
+            historyNotes.map((note, index) => (
               <div key={note.id} className="relative pl-20">
                 {/* 타임라인 점 */}
                 <div className="absolute left-6 top-2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white shadow" />
@@ -94,7 +94,7 @@ const PatchNotes = () => {
                   </span>
                 </div>
 
-                {/* 패치노트 카드 */}
+                {/* 개발 히스토리 카드 */}
                 <div className="card group hover:shadow-lg transition-shadow">
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -149,7 +149,7 @@ const PatchNotes = () => {
 
       {/* 작성/수정 모달 */}
       {isWriteModalOpen && (
-        <PatchNoteModal
+        <HistoryModal
           note={editNote}
           onClose={() => {
             setIsWriteModalOpen(false)
@@ -162,8 +162,8 @@ const PatchNotes = () => {
   )
 }
 
-// 패치노트 작성/수정 모달
-const PatchNoteModal = ({ note, onClose, onSubmit }) => {
+// 개발 히스토리 작성/수정 모달
+const HistoryModal = ({ note, onClose, onSubmit }) => {
   const [version, setVersion] = useState(note?.version || '')
   const [title, setTitle] = useState(note?.title || '')
   const [content, setContent] = useState(note?.content || '')
@@ -190,7 +190,7 @@ const PatchNoteModal = ({ note, onClose, onSubmit }) => {
         {/* 헤더 */}
         <div className="flex items-center justify-between p-6 border-b border-notion-gray-200">
           <h2 className="text-2xl font-bold text-notion-text">
-            {note ? '패치노트 수정' : '새 패치노트'}
+            {note ? '개발 히스토리 수정' : '새 개발 히스토리'}
           </h2>
           <button
             onClick={onClose}
@@ -276,4 +276,4 @@ const PatchNoteModal = ({ note, onClose, onSubmit }) => {
   )
 }
 
-export default PatchNotes
+export default DevelopmentHistory

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 
-// 패치노트 목록 조회
-export const usePatchNotes = () => {
+// 개발 히스토리 목록 조회
+export const useDevelopmentHistory = () => {
   return useQuery({
-    queryKey: ['patchNotes'],
+    queryKey: ['developmentHistory'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('patch_notes')
@@ -26,8 +26,8 @@ export const usePatchNotes = () => {
   })
 }
 
-// 패치노트 작성
-export const useCreatePatchNote = () => {
+// 개발 히스토리 작성
+export const useCreateHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -45,13 +45,13 @@ export const useCreatePatchNote = () => {
       return data[0]
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patchNotes'] })
+      queryClient.invalidateQueries({ queryKey: ['developmentHistory'] })
     }
   })
 }
 
-// 패치노트 수정
-export const useUpdatePatchNote = () => {
+// 개발 히스토리 수정
+export const useUpdateHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -71,13 +71,13 @@ export const useUpdatePatchNote = () => {
       return data[0]
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patchNotes'] })
+      queryClient.invalidateQueries({ queryKey: ['developmentHistory'] })
     }
   })
 }
 
-// 패치노트 삭제
-export const useDeletePatchNote = () => {
+// 개발 히스토리 삭제
+export const useDeleteHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -90,7 +90,7 @@ export const useDeletePatchNote = () => {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['patchNotes'] })
+      queryClient.invalidateQueries({ queryKey: ['developmentHistory'] })
     }
   })
 }
