@@ -186,7 +186,7 @@ export const useDeletePost = () => {
   })
 }
 
-// 댓글 추가
+// 댓글 추가 (Optimistic Update)
 export const useAddComment = () => {
   const queryClient = useQueryClient()
 
@@ -220,13 +220,47 @@ export const useAddComment = () => {
 
       return newComment
     },
-    onSuccess: () => {
+    // Optimistic Update: 서버 요청 전에 UI 즉시 업데이트
+    onMutate: async ({ postId, commentText }) => {
+      // 진행 중인 쿼리 취소 (충돌 방지)
+      await queryClient.cancelQueries({ queryKey: ['post', postId] })
+
+      // 이전 데이터 백업
+      const previousPost = queryClient.getQueryData(['post', postId])
+
+      // 즉시 UI 업데이트
+      if (previousPost) {
+        queryClient.setQueryData(['post', postId], {
+          ...previousPost,
+          comments: [
+            ...(previousPost.comments || []),
+            {
+              id: `temp-${Date.now()}`, // 임시 ID
+              text: commentText,
+              created_at: new Date().toISOString()
+            }
+          ]
+        })
+      }
+
+      // 롤백용 백업 데이터 반환
+      return { previousPost }
+    },
+    // 에러 시 롤백
+    onError: (err, variables, context) => {
+      if (context?.previousPost) {
+        queryClient.setQueryData(['post', variables.postId], context.previousPost)
+      }
+    },
+    // 성공/실패 상관없이 최종적으로 서버 데이터로 갱신
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['post', variables.postId] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     }
   })
 }
 
-// 댓글 삭제
+// 댓글 삭제 (Optimistic Update)
 export const useDeleteComment = () => {
   const queryClient = useQueryClient()
 
@@ -252,7 +286,34 @@ export const useDeleteComment = () => {
 
       if (updateError) throw updateError
     },
-    onSuccess: () => {
+    // Optimistic Update: 서버 요청 전에 UI 즉시 업데이트
+    onMutate: async ({ postId, commentId }) => {
+      // 진행 중인 쿼리 취소
+      await queryClient.cancelQueries({ queryKey: ['post', postId] })
+
+      // 이전 데이터 백업
+      const previousPost = queryClient.getQueryData(['post', postId])
+
+      // 즉시 UI에서 댓글 제거
+      if (previousPost) {
+        queryClient.setQueryData(['post', postId], {
+          ...previousPost,
+          comments: (previousPost.comments || []).filter(c => c.id !== commentId)
+        })
+      }
+
+      // 롤백용 백업 데이터 반환
+      return { previousPost }
+    },
+    // 에러 시 롤백
+    onError: (err, variables, context) => {
+      if (context?.previousPost) {
+        queryClient.setQueryData(['post', variables.postId], context.previousPost)
+      }
+    },
+    // 성공/실패 상관없이 최종적으로 서버 데이터로 갱신
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['post', variables.postId] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
     }
   })
