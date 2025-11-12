@@ -19,14 +19,25 @@ const Board = () => {
   const updatePost = useUpdatePost()
   const deletePost = useDeletePost()
 
-  // 게시판에서 뒤로가기 방지 (페이지 탈출 방지)
+  // 뒤로가기 처리 (모달 닫기 + 페이지 탈출 방지)
   useEffect(() => {
     // 히스토리 엔트리 추가 (뒤로가기 버퍼)
     window.history.pushState(null, '', window.location.href)
 
     const handlePopState = (event) => {
-      // 게시판에서 뒤로가기 시 다시 게시판으로
-      window.history.pushState(null, '', window.location.href)
+      // 모달이 열려있으면 모달 닫기
+      if (isDetailModalOpen) {
+        setIsDetailModalOpen(false)
+        setSelectedPostId(null)
+        window.history.pushState(null, '', window.location.href)
+      } else if (isWriteModalOpen) {
+        setIsWriteModalOpen(false)
+        setEditPost(null)
+        window.history.pushState(null, '', window.location.href)
+      } else {
+        // 모달이 없으면 게시판에서 뒤로가기 방지
+        window.history.pushState(null, '', window.location.href)
+      }
     }
 
     window.addEventListener('popstate', handlePopState)
@@ -34,7 +45,14 @@ const Board = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState)
     }
-  }, [])
+  }, [isDetailModalOpen, isWriteModalOpen])
+
+  // 모달 열릴 때 히스토리 엔트리 추가
+  useEffect(() => {
+    if (isDetailModalOpen || isWriteModalOpen) {
+      window.history.pushState(null, '', window.location.href)
+    }
+  }, [isDetailModalOpen, isWriteModalOpen])
 
   // 검색 필터링
   const filteredPosts = posts.filter(post => {
