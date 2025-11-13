@@ -1,6 +1,140 @@
-import { useState } from 'react'
-import { useDevelopmentHistory, useCreateHistory, useUpdateHistory, useDeleteHistory } from '../hooks/useDevelopmentHistory'
+import { useState, useEffect } from 'react'
+import { useDevelopmentHistory, useHistoryContent, useHistoryDetail, useCreateHistory, useUpdateHistory, useDeleteHistory } from '../hooks/useDevelopmentHistory'
 import ReactMarkdown from 'react-markdown'
+
+// 개별 히스토리 카드 컴포넌트
+const HistoryCard = ({ note, isExpanded, onToggleExpand, onEdit, onDelete }) => {
+  // 펼쳐졌을 때만 content 로딩
+  const { data: content, isLoading: contentLoading } = useHistoryContent(isExpanded ? note.id : null)
+
+  return (
+    <div className="relative sm:pl-20">
+      {/* 타임라인 점 - 모바일에서 숨김 */}
+      <div className="hidden sm:block absolute left-6 top-2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white shadow" />
+
+      {/* 버전 뱃지 - PC에서만 absolute */}
+      <div className="hidden sm:block absolute left-0 top-1">
+        <span className="inline-block px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded-full">
+          {note.version}
+        </span>
+      </div>
+
+      {/* 모바일 버전 뱃지 - 카드 위에 표시 */}
+      <div className="sm:hidden mb-2">
+        <span className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+          {note.version}
+        </span>
+      </div>
+
+      {/* 개발 히스토리 카드 */}
+      <div className="card group hover:shadow-lg transition-shadow">
+        {/* 클릭 가능한 헤더 */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+          {/* 왼쪽: 제목 영역 (모바일에서는 버튼이 위에) */}
+          <div className="flex items-start gap-2 order-2 sm:order-1">
+            {/* 수정/삭제 버튼 - 모바일에서는 왼쪽에 표시 */}
+            <div className="flex gap-1 sm:hidden">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit()
+                }}
+                className="p-1.5 text-notion-gray-600 hover:text-notion-text hover:bg-notion-gray-100 rounded transition-colors"
+                title="수정"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}
+                className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                title="삭제"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 제목과 날짜 */}
+            <div
+              className="flex-1 cursor-pointer"
+              onClick={onToggleExpand}
+            >
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-notion-text mb-1">
+                  {note.title}
+                </h2>
+                {/* 펼치기/접기 아이콘 */}
+                <svg
+                  className={`w-4 h-4 sm:w-5 sm:h-5 text-notion-gray-500 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <p className="text-xs text-notion-gray-500">
+                {new Date(note.createdAt).toLocaleString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+                {note.updatedAt !== note.createdAt && ' (수정됨)'}
+              </p>
+            </div>
+          </div>
+
+          {/* 수정/삭제 버튼 - PC에서만 오른쪽에 표시 */}
+          <div className="hidden sm:flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity order-1 sm:order-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit()
+              }}
+              className="p-2 text-notion-gray-600 hover:text-notion-text hover:bg-notion-gray-100 rounded transition-colors"
+              title="수정"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete()
+              }}
+              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+              title="삭제"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* 펼쳐지는 마크다운 콘텐츠 */}
+        {isExpanded && (
+          <div className="prose prose-sm sm:prose max-w-none text-notion-text mt-4 pt-4 border-t border-notion-gray-200">
+            {contentLoading ? (
+              <p className="text-notion-gray-500">로딩 중...</p>
+            ) : (
+              <ReactMarkdown>{content}</ReactMarkdown>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const DevelopmentHistory = () => {
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
@@ -42,8 +176,8 @@ const DevelopmentHistory = () => {
     }
   }
 
-  const handleEdit = (note) => {
-    setEditNote(note)
+  const handleEdit = (noteId) => {
+    setEditNote({ id: noteId })
     setIsWriteModalOpen(true)
   }
 
@@ -88,95 +222,14 @@ const DevelopmentHistory = () => {
             </div>
           ) : (
             historyNotes.map((note, index) => (
-              <div key={note.id} className="relative sm:pl-20">
-                {/* 타임라인 점 - 모바일에서 숨김 */}
-                <div className="hidden sm:block absolute left-6 top-2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white shadow" />
-
-                {/* 버전 뱃지 - PC에서만 absolute */}
-                <div className="hidden sm:block absolute left-0 top-1">
-                  <span className="inline-block px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded-full">
-                    {note.version}
-                  </span>
-                </div>
-
-                {/* 모바일 버전 뱃지 - 카드 위에 표시 */}
-                <div className="sm:hidden mb-2">
-                  <span className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
-                    {note.version}
-                  </span>
-                </div>
-
-                {/* 개발 히스토리 카드 */}
-                <div className="card group hover:shadow-lg transition-shadow">
-                  {/* 클릭 가능한 헤더 */}
-                  <div
-                    className="flex justify-between items-start cursor-pointer"
-                    onClick={() => toggleExpand(note.id)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-base sm:text-lg font-bold text-notion-text mb-1">
-                          {note.title}
-                        </h2>
-                        {/* 펼치기/접기 아이콘 */}
-                        <svg
-                          className={`w-4 h-4 sm:w-5 sm:h-5 text-notion-gray-500 transition-transform flex-shrink-0 ${expandedId === note.id ? 'rotate-180' : ''}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-notion-gray-500">
-                        {new Date(note.createdAt).toLocaleString('ko-KR', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                        {note.updatedAt !== note.createdAt && ' (수정됨)'}
-                      </p>
-                    </div>
-
-                    {/* 수정/삭제 버튼 */}
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEdit(note)
-                        }}
-                        className="p-2 text-notion-gray-600 hover:text-notion-text hover:bg-notion-gray-100 rounded transition-colors"
-                        title="수정"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDelete(note.id)
-                        }}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                        title="삭제"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* 펼쳐지는 마크다운 콘텐츠 */}
-                  {expandedId === note.id && (
-                    <div className="prose prose-sm sm:prose max-w-none text-notion-text mt-4 pt-4 border-t border-notion-gray-200">
-                      <ReactMarkdown>{note.content}</ReactMarkdown>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <HistoryCard
+                key={note.id}
+                note={note}
+                isExpanded={expandedId === note.id}
+                onToggleExpand={() => toggleExpand(note.id)}
+                onEdit={() => handleEdit(note.id)}
+                onDelete={() => handleDelete(note.id)}
+              />
             ))
           )}
         </div>
@@ -199,9 +252,21 @@ const DevelopmentHistory = () => {
 
 // 개발 히스토리 작성/수정 모달
 const HistoryModal = ({ note, onClose, onSubmit }) => {
-  const [version, setVersion] = useState(note?.version || '')
-  const [title, setTitle] = useState(note?.title || '')
-  const [content, setContent] = useState(note?.content || '')
+  // 수정 모드일 때 상세 데이터 로딩
+  const { data: noteDetail, isLoading: detailLoading } = useHistoryDetail(note?.id)
+
+  const [version, setVersion] = useState('')
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+
+  // 데이터 로딩 완료 시 폼 초기화
+  useEffect(() => {
+    if (noteDetail) {
+      setVersion(noteDetail.version)
+      setTitle(noteDetail.title)
+      setContent(noteDetail.content)
+    }
+  }, [noteDetail])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -212,11 +277,22 @@ const HistoryModal = ({ note, onClose, onSubmit }) => {
     }
 
     onSubmit({
-      ...(note && { id: note.id }),
+      ...(note?.id && { id: note.id }),
       version: version.trim(),
       title: title.trim(),
       content: content.trim()
     })
+  }
+
+  // 로딩 중일 때
+  if (note?.id && detailLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg shadow-xl p-8">
+          <p className="text-notion-text">데이터 로딩 중...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
