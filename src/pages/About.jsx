@@ -61,7 +61,7 @@ const About = () => {
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
         alert('Safari에서 하단의 공유 버튼(⬆️)을 탭한 후 "홈 화면에 추가"를 선택하세요.')
       } else {
-        alert('이 브라우저는 앱 설치를 지원하지 않습니다.')
+        alert('이 브라우저는 앱 설치를 지원하지 않습니다.\n\nChrome 브라우저로 접속하시면 원클릭으로 앱을 설치할 수 있습니다!')
       }
       return
     }
