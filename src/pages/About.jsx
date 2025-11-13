@@ -14,7 +14,6 @@ const About = () => {
   const [isLoadingStorage, setIsLoadingStorage] = useState(true)
 
   // PWA 설치 관련 상태
-  const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstallable, setIsInstallable] = useState(false)
 
   useEffect(() => {
@@ -34,28 +33,32 @@ const About = () => {
     fetchStorageUsage()
   }, [])
 
-  // PWA 설치 프롬프트 캡처
+  // PWA 설치 가능 여부 확인
   useEffect(() => {
-    const handler = (e) => {
-      // 브라우저의 기본 설치 프롬프트 방지
-      e.preventDefault()
-      // 나중에 사용하기 위해 이벤트 저장
-      setDeferredPrompt(e)
-      setIsInstallable(true)
+    // App.jsx에서 캡처한 프롬프트 확인
+    const checkInstallability = () => {
+      if (window.deferredPrompt) {
+        setIsInstallable(true)
+      }
     }
 
-    window.addEventListener('beforeinstallprompt', handler)
+    // 초기 확인
+    checkInstallability()
 
-    // 이미 설치되어 있는지 확인
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstallable(false)
-    }
+    // 주기적으로 확인 (이벤트가 늦게 발생할 수 있음)
+    const interval = setInterval(checkInstallability, 500)
 
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    setTimeout(() => {
+      clearInterval(interval)
+    }, 3000)
+
+    return () => clearInterval(interval)
   }, [])
 
   // PWA 설치 버튼 클릭 핸들러
   const handleInstallClick = async () => {
+    const deferredPrompt = window.deferredPrompt
+
     if (!deferredPrompt) {
       const ua = navigator.userAgent
 
@@ -93,13 +96,13 @@ const About = () => {
     const { outcome } = await deferredPrompt.userChoice
 
     if (outcome === 'accepted') {
-      console.log('PWA 설치 완료')
+      console.log('✅ PWA 설치 완료')
     } else {
-      console.log('PWA 설치 취소')
+      console.log('❌ PWA 설치 취소')
     }
 
     // 프롬프트는 한 번만 사용 가능
-    setDeferredPrompt(null)
+    window.deferredPrompt = null
     setIsInstallable(false)
   }
 
