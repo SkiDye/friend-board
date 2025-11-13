@@ -136,7 +136,7 @@ const About = () => {
                 onClick={handleInstallClick}
                 className="w-full sm:w-auto btn-primary text-sm sm:text-base"
               >
-                📲 홈 화면에 추가
+                📲 앱 설치
               </button>
             )}
           </section>
