@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PostContent from "./PostContent"
 import ImageViewer from "./ImageViewer"
 import { usePost, useAddComment, useDeleteComment } from "../../hooks/usePosts"
@@ -10,6 +10,18 @@ const PostDetailModal = ({ isOpen, postId, onClose, onEdit, onDelete }) => {
   const { data: post, isLoading } = usePost(postId)
   const addCommentMutation = useAddComment()
   const deleteCommentMutation = useDeleteComment()
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   if (!isOpen || !postId) return null
 

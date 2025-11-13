@@ -1,8 +1,9 @@
 import { findYoutubeUrls } from "../../utils/youtube"
 import YoutubePlayer from "../common/YoutubePlayer"
+import LinkPreview from "../common/LinkPreview"
 
 /**
- * 텍스트에서 URL을 찾아 하이퍼링크로 변환
+ * 텍스트에서 URL을 찾아 LinkPreview 카드로 변환
  */
 const linkifyText = (text) => {
   // URL 정규식 (http, https로 시작)
@@ -17,17 +18,12 @@ const linkifyText = (text) => {
       parts.push(text.substring(lastIndex, match.index))
     }
 
-    // URL을 링크로 변환
+    // URL을 LinkPreview 카드로 변환
     parts.push(
-      <a
+      <LinkPreview
         key={match.index}
-        href={match[0]}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 hover:text-blue-800 underline break-all"
-      >
-        {match[0]}
-      </a>
+        url={match[0]}
+      />
     )
 
     lastIndex = match.index + match[0].length
