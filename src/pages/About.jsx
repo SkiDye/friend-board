@@ -13,6 +13,10 @@ const About = () => {
   const [storageUsedBytes, setStorageUsedBytes] = useState(0)
   const [isLoadingStorage, setIsLoadingStorage] = useState(true)
 
+  // PWA 설치 관련 상태
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [isInstallable, setIsInstallable] = useState(false)
+
   useEffect(() => {
     const fetchStorageUsage = async () => {
       try {
@@ -29,6 +33,55 @@ const About = () => {
 
     fetchStorageUsage()
   }, [])
+
+  // PWA 설치 프롬프트 캡처
+  useEffect(() => {
+    const handler = (e) => {
+      // 브라우저의 기본 설치 프롬프트 방지
+      e.preventDefault()
+      // 나중에 사용하기 위해 이벤트 저장
+      setDeferredPrompt(e)
+      setIsInstallable(true)
+    }
+
+    window.addEventListener('beforeinstallprompt', handler)
+
+    // 이미 설치되어 있는지 확인
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstallable(false)
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  // PWA 설치 버튼 클릭 핸들러
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      // iOS Safari인 경우 안내 메시지
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        alert('Safari에서 하단의 공유 버튼(⬆️)을 탭한 후 "홈 화면에 추가"를 선택하세요.')
+      } else {
+        alert('이 브라우저는 앱 설치를 지원하지 않습니다.')
+      }
+      return
+    }
+
+    // 설치 프롬프트 표시
+    deferredPrompt.prompt()
+
+    // 사용자의 응답 대기
+    const { outcome } = await deferredPrompt.userChoice
+
+    if (outcome === 'accepted') {
+      console.log('PWA 설치 완료')
+    } else {
+      console.log('PWA 설치 취소')
+    }
+
+    // 프롬프트는 한 번만 사용 가능
+    setDeferredPrompt(null)
+    setIsInstallable(false)
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -63,6 +116,39 @@ const About = () => {
               <li>모바일 최적화</li>
               <li>실시간 데이터 동기화</li>
             </ul>
+          </section>
+
+          {/* PWA 설치 섹션 */}
+          <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2 text-notion-text flex items-center gap-2">
+              📱 앱으로 설치하기
+            </h2>
+            <p className="text-sm mb-3 text-notion-gray-700">
+              프렌드보드를 스마트폰 홈 화면에 추가하면 앱처럼 빠르게 사용할 수 있습니다!
+            </p>
+
+            {window.matchMedia('(display-mode: standalone)').matches ? (
+              <div className="bg-green-100 border border-green-300 rounded-md p-3 text-sm text-green-800">
+                ✅ 이미 앱으로 설치되어 사용 중입니다!
+              </div>
+            ) : isInstallable ? (
+              <button
+                onClick={handleInstallClick}
+                className="w-full sm:w-auto btn-primary text-sm sm:text-base"
+              >
+                📲 홈 화면에 추가
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <div className="bg-notion-gray-100 border border-notion-gray-200 rounded-md p-3 text-xs sm:text-sm text-notion-gray-700">
+                  <p className="font-semibold mb-2">수동으로 추가하는 방법:</p>
+                  <div className="space-y-1">
+                    <p><strong>Android (Chrome):</strong> 우측 상단 ⋮ → "홈 화면에 추가"</p>
+                    <p><strong>iOS (Safari):</strong> 하단 공유 버튼(⬆️) → "홈 화면에 추가"</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           <section>
