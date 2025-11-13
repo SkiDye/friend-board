@@ -57,12 +57,32 @@ const About = () => {
   // PWA 설치 버튼 클릭 핸들러
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
+      const ua = navigator.userAgent
+
       // iOS Safari인 경우 안내 메시지
-      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      if (/iPad|iPhone|iPod/.test(ua)) {
         alert('Safari에서 하단의 공유 버튼(⬆️)을 탭한 후 "홈 화면에 추가"를 선택하세요.')
-      } else {
-        alert('이 브라우저는 앱 설치를 지원하지 않습니다.\n\nChrome, Edge, Samsung Internet 등 최신 브라우저로 접속하시면 원클릭으로 앱을 설치할 수 있습니다!')
+        return
       }
+
+      // 인앱 브라우저 감지
+      const inAppBrowserPatterns = [
+        { pattern: /KAKAOTALK/i, name: '카카오톡' },
+        { pattern: /Telegram/i, name: '텔레그램' },
+        { pattern: /FBAN|FBAV/i, name: '페이스북' },
+        { pattern: /Instagram/i, name: '인스타그램' },
+        { pattern: /Line/i, name: '라인' }
+      ]
+
+      for (const browser of inAppBrowserPatterns) {
+        if (browser.pattern.test(ua)) {
+          alert(`${browser.name} 인앱 브라우저에서는 앱 설치가 지원되지 않습니다.\n\n우측 상단 ⋮ 메뉴에서 "외부 브라우저로 열기" 또는 "Chrome으로 열기"를 선택해주세요.\n\n그런 다음 Chrome 앱 자체에서 이 사이트를 직접 열어야 합니다!`)
+          return
+        }
+      }
+
+      // 일반 브라우저
+      alert('앱 설치가 지원되지 않습니다.\n\n가능한 원인:\n• 이미 앱이 설치되어 있음\n• Chrome, Edge, Samsung Internet 등 지원 브라우저가 아님\n• 인앱 브라우저나 Custom Tabs에서 열림\n\n해결 방법:\nChrome 앱을 직접 열고 주소창에 URL을 입력하거나 북마크로 접속해주세요!')
       return
     }
 
