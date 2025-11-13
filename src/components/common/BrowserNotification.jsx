@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 const BrowserNotification = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false)
 
   useEffect(() => {
     // 이미 닫았는지 확인
@@ -13,8 +14,31 @@ const BrowserNotification = () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     if (!isMobile) return
 
-    // iOS는 Safari 지원하므로 알림 불필요
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const ua = navigator.userAgent
+
+    // 인앱 브라우저 감지 (카카오톡, 텔레그램, 페이스북, 인스타그램, 라인 등)
+    const inAppBrowserPatterns = [
+      /KAKAOTALK/i,
+      /Telegram/i,
+      /FBAN|FBAV/i,
+      /Instagram/i,
+      /Line/i,
+      /WhatsApp/i,
+      /Twitter/i
+    ]
+
+    const isInApp = inAppBrowserPatterns.some(pattern => pattern.test(ua))
+
+    if (isInApp) {
+      // 인앱 브라우저는 즉시 알림 표시
+      setIsInAppBrowser(true)
+      setIsVisible(true)
+      setTimeout(() => setIsAnimating(true), 10)
+      return
+    }
+
+    // iOS Safari는 PWA 지원하므로 알림 불필요 (단, 인앱 브라우저는 위에서 이미 처리됨)
+    const isIOS = /iPad|iPhone|iPod/.test(ua)
     if (isIOS) return
 
     // PWA 설치 지원 여부 확인
@@ -67,10 +91,21 @@ const BrowserNotification = () => {
           </div>
 
           <div className="flex-1 text-sm">
-            <p className="font-semibold mb-1">더 나은 경험을 위해</p>
-            <p className="text-blue-100">
-              Chrome, Edge, Samsung Internet 등으로 접속하시면 앱을 설치할 수 있습니다!
-            </p>
+            {isInAppBrowser ? (
+              <>
+                <p className="font-semibold mb-1">외부 브라우저로 열기</p>
+                <p className="text-blue-100">
+                  우측 상단 ⋮ 메뉴에서 "외부 브라우저로 열기"를 선택하면 앱을 설치할 수 있습니다!
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold mb-1">더 나은 경험을 위해</p>
+                <p className="text-blue-100">
+                  Chrome, Edge, Samsung Internet 등으로 접속하시면 앱을 설치할 수 있습니다!
+                </p>
+              </>
+            )}
           </div>
 
           <button
