@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Outlet } from "react-router-dom"
 import Sidebar from "./Sidebar"
 import Header from "./Header"
+import BrowserNotification from "../common/BrowserNotification"
 
 const MainLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -16,6 +17,7 @@ const MainLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <BrowserNotification />
       <Sidebar isMobileOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header onMenuClick={toggleMobileMenu} />
