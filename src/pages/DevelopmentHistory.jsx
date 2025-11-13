@@ -5,11 +5,16 @@ import ReactMarkdown from 'react-markdown'
 const DevelopmentHistory = () => {
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false)
   const [editNote, setEditNote] = useState(null)
+  const [expandedId, setExpandedId] = useState(null) // 펼쳐진 히스토리 ID
 
   const { data: historyNotes = [], isLoading } = useDevelopmentHistory()
   const createNote = useCreateHistory()
   const updateNote = useUpdateHistory()
   const deleteNote = useDeleteHistory()
+
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id)
+  }
 
   const handleSubmit = async (noteData) => {
     try {
@@ -96,11 +101,26 @@ const DevelopmentHistory = () => {
 
                 {/* 개발 히스토리 카드 */}
                 <div className="card group hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h2 className="text-xl font-bold text-notion-text mb-1">
-                        {note.title}
-                      </h2>
+                  {/* 클릭 가능한 헤더 */}
+                  <div
+                    className="flex justify-between items-start cursor-pointer"
+                    onClick={() => toggleExpand(note.id)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-notion-text mb-1">
+                          {note.title}
+                        </h2>
+                        {/* 펼치기/접기 아이콘 */}
+                        <svg
+                          className={`w-5 h-5 text-notion-gray-500 transition-transform ${expandedId === note.id ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                       <p className="text-xs text-notion-gray-500">
                         {new Date(note.createdAt).toLocaleString('ko-KR', {
                           year: 'numeric',
@@ -116,7 +136,10 @@ const DevelopmentHistory = () => {
                     {/* 수정/삭제 버튼 */}
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleEdit(note)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEdit(note)
+                        }}
                         className="p-2 text-notion-gray-600 hover:text-notion-text hover:bg-notion-gray-100 rounded transition-colors"
                         title="수정"
                       >
@@ -125,7 +148,10 @@ const DevelopmentHistory = () => {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDelete(note.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(note.id)
+                        }}
                         className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                         title="삭제"
                       >
@@ -136,10 +162,12 @@ const DevelopmentHistory = () => {
                     </div>
                   </div>
 
-                  {/* 마크다운 콘텐츠 */}
-                  <div className="prose max-w-none text-notion-text">
-                    <ReactMarkdown>{note.content}</ReactMarkdown>
-                  </div>
+                  {/* 펼쳐지는 마크다운 콘텐츠 */}
+                  {expandedId === note.id && (
+                    <div className="prose max-w-none text-notion-text mt-4 pt-4 border-t border-notion-gray-200">
+                      <ReactMarkdown>{note.content}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
