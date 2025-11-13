@@ -58,10 +58,10 @@ const DevelopmentHistory = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-8">
       {/* 헤더 */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-notion-text mb-2">개발 히스토리</h1>
-          <p className="text-notion-gray-500 text-sm">Friend Board의 개발 변천사입니다</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-notion-text mb-2">개발 히스토리</h1>
+          <p className="text-notion-gray-500 text-xs sm:text-sm">Friend Board의 개발 변천사입니다</p>
         </div>
         <button
           onClick={() => {
@@ -76,11 +76,11 @@ const DevelopmentHistory = () => {
 
       {/* 타임라인 (가로로 길게) */}
       <div className="relative">
-        {/* 타임라인 선 */}
-        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-notion-gray-200" />
+        {/* 타임라인 선 - 모바일에서 숨김 */}
+        <div className="hidden sm:block absolute left-8 top-0 bottom-0 w-0.5 bg-notion-gray-200" />
 
         {/* 개발 히스토리 리스트 */}
-        <div className="space-y-8">
+        <div className="space-y-4 sm:space-y-8">
           {historyNotes.length === 0 ? (
             <div className="text-center py-12 text-notion-gray-500">
               <p>아직 개발 히스토리가 없습니다.</p>
@@ -88,13 +88,20 @@ const DevelopmentHistory = () => {
             </div>
           ) : (
             historyNotes.map((note, index) => (
-              <div key={note.id} className="relative pl-20">
-                {/* 타임라인 점 */}
-                <div className="absolute left-6 top-2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white shadow" />
+              <div key={note.id} className="relative sm:pl-20">
+                {/* 타임라인 점 - 모바일에서 숨김 */}
+                <div className="hidden sm:block absolute left-6 top-2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white shadow" />
 
-                {/* 버전 뱃지 */}
-                <div className="absolute left-0 top-1">
+                {/* 버전 뱃지 - PC에서만 absolute */}
+                <div className="hidden sm:block absolute left-0 top-1">
                   <span className="inline-block px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded-full">
+                    {note.version}
+                  </span>
+                </div>
+
+                {/* 모바일 버전 뱃지 - 카드 위에 표시 */}
+                <div className="sm:hidden mb-2">
+                  <span className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
                     {note.version}
                   </span>
                 </div>
@@ -108,12 +115,12 @@ const DevelopmentHistory = () => {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-notion-text mb-1">
+                        <h2 className="text-base sm:text-lg font-bold text-notion-text mb-1">
                           {note.title}
                         </h2>
                         {/* 펼치기/접기 아이콘 */}
                         <svg
-                          className={`w-5 h-5 text-notion-gray-500 transition-transform ${expandedId === note.id ? 'rotate-180' : ''}`}
+                          className={`w-4 h-4 sm:w-5 sm:h-5 text-notion-gray-500 transition-transform flex-shrink-0 ${expandedId === note.id ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -164,7 +171,7 @@ const DevelopmentHistory = () => {
 
                   {/* 펼쳐지는 마크다운 콘텐츠 */}
                   {expandedId === note.id && (
-                    <div className="prose max-w-none text-notion-text mt-4 pt-4 border-t border-notion-gray-200">
+                    <div className="prose prose-sm sm:prose max-w-none text-notion-text mt-4 pt-4 border-t border-notion-gray-200">
                       <ReactMarkdown>{note.content}</ReactMarkdown>
                     </div>
                   )}
