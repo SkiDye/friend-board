@@ -131,23 +131,13 @@ const About = () => {
               <div className="bg-green-100 border border-green-300 rounded-md p-3 text-sm text-green-800">
                 ✅ 이미 앱으로 설치되어 사용 중입니다!
               </div>
-            ) : isInstallable ? (
+            ) : (
               <button
                 onClick={handleInstallClick}
                 className="w-full sm:w-auto btn-primary text-sm sm:text-base"
               >
                 📲 홈 화면에 추가
               </button>
-            ) : (
-              <div className="space-y-2">
-                <div className="bg-notion-gray-100 border border-notion-gray-200 rounded-md p-3 text-xs sm:text-sm text-notion-gray-700">
-                  <p className="font-semibold mb-2">수동으로 추가하는 방법:</p>
-                  <div className="space-y-1">
-                    <p><strong>Android (Chrome):</strong> 우측 상단 ⋮ → "홈 화면에 추가"</p>
-                    <p><strong>iOS (Safari):</strong> 하단 공유 버튼(⬆️) → "홈 화면에 추가"</p>
-                  </div>
-                </div>
-              </div>
             )}
           </section>
 
